@@ -7,7 +7,44 @@
     <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <style>
-        /* ส่วน CSS ยังคงเหมือนเดิม */
+         body {
+            background-color: #f7f7f7;
+            padding-top: 50px;
+            padding-bottom: 50px;
+        }
+        .container {
+            max-width: 1400px;
+        }
+        #previewContainer {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            min-height: 700px;
+            overflow: auto;
+            position: relative;
+        }
+        #loadingOverlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255,255,255,0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: #555;
+            z-index: 10;
+            display: none;
+        }
+        pre {
+            background-color: #f1f1f1;
+            padding: 15px;
+            border-radius: 5px;
+            overflow: auto;
+        }
     </style>
 </head>
 <body>
@@ -60,7 +97,7 @@
 
     <!-- LIFF and Main Script -->
     <script>
-        const liffId = '2005615503-drRxpq86'; // Replace with your actual LIFF ID
+        const liffId = '2005615503-Gxyb3Yw9'; // Replace with your actual LIFF ID
         const scriptUrl = 'https://script.google.com/macros/s/AKfycbz7GG8k8tSUArT1M837Z9Pb1dfFqFe9Gz5ZggoSYSoxNdXQMWd3zcXN_2pGdfg_cPWVoQ/exec'; // Replace with your Google Apps Script Web App URL
         let userId = '';
         let displayName = '';
