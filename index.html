@@ -1,15 +1,402 @@
 <!DOCTYPE html>
-
-<html>
-   <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>พรประภา เสวกวิหารี(โค้ชอ้อ)</title>
-<link rel="icon" href="https://lh3.googleusercontent.com/d/1GNTsQfBXQVEPHVwSAGmu7BVX4wiRsvG5" type="image/x-icon">
-<link rel="shortcut icon" href="https://lh3.googleusercontent.com/d/1GNTsQfBXQVEPHVwSAGmu7BVX4wiRsvG5" type="image/x-icon">
-<link rel="icon" href="https://https://lh3.googleusercontent.com/d/1GNTsQfBXQVEPHVwSAGmu7BVX4wiRsvG5" type="image/png">
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LINE Flex Message Editor</title>
+    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        /* ส่วน CSS ยังคงเหมือนเดิม */
+    </style>
 </head>
-   <body>
-      <iframe style="position: absolute;top: 0;left: 0;width: 100%;height: 100%;border: 0;" src="https://script.google.com/macros/s/AKfycbzxcLW4YYRkSpyFuxE8hzEpZoL8AdTOpJ9N28-jsZBmFho2sf2mpsl8umn2kaWzSHnp/exec"></iframe>
-   </body>
+<body>
+
+    <div class="container">
+        <h1 class="text-center mb-5">LINE Flex Message Editor</h1>
+        <div class="row">
+            <!-- Editor Section -->
+            <div class="col-md-6 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">JSON Editor</h5>
+                    </div>
+                    <div class="card-body">
+                        <textarea id="jsonInput" class="form-control" rows="20" placeholder="Enter your Flex Message JSON here"></textarea>
+                        <div class="mt-3 d-flex justify-content-between">
+                            <button class="btn btn-success" onclick="updatePreview()">Update Preview</button>
+                            <button class="btn btn-primary" onclick="shareMessage()">Share Message</button>
+                            <button class="btn btn-warning" onclick="saveMessage()">Save Message</button>
+                            <button class="btn btn-secondary" onclick="clearEditor()">Clear</button>
+                        </div>
+                    </div>
+                </div>
+                <!-- Saved Messages Section -->
+                <div class="card shadow-sm mt-4">
+                    <div class="card-header bg-secondary text-white">
+                        <h5 class="mb-0">Saved Messages</h5>
+                    </div>
+                    <div class="card-body" id="savedMessages">
+                        <p>Loading saved messages...</p>
+                    </div>
+                </div>
+            </div>
+            <!-- Preview Section -->
+            <div class="col-md-6 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0">Preview</h5>
+                    </div>
+                    <div class="card-body position-relative" id="previewContainer">
+                        <div id="loadingOverlay">
+                            <span>Loading Preview...</span>
+                        </div>
+                        <iframe id="previewFrame" style="width:100%; height:100%; border:none;"></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- LIFF and Main Script -->
+    <script>
+        const liffId = '2005615503-drRxpq86'; // Replace with your actual LIFF ID
+        const scriptUrl = 'https://script.google.com/macros/s/AKfycbz7GG8k8tSUArT1M837Z9Pb1dfFqFe9Gz5ZggoSYSoxNdXQMWd3zcXN_2pGdfg_cPWVoQ/exec'; // Replace with your Google Apps Script Web App URL
+        let userId = '';
+        let displayName = '';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeLiff();
+        });
+
+        function initializeLiff() {
+            liff.init({ liffId })
+                .then(() => {
+                    if (!liff.isLoggedIn()) {
+                        liff.login();
+                    } else {
+                        getUserProfile();
+                    }
+                })
+                .catch(err => {
+                    console.error('LIFF Initialization failed', err);
+                });
+        }
+
+        function getUserProfile() {
+            liff.getProfile()
+                .then(profile => {
+                    userId = profile.userId;
+                    displayName = profile.displayName;
+                    saveUserInfo(userId, displayName);
+                })
+                .catch(err => {
+                    console.error('Failed to get profile', err);
+                });
+        }
+
+        function saveUserInfo(uid, name) {
+            fetch(`${scriptUrl}?action=saveUserInfo&uid=${uid}&name=${name}`)
+                .then(response => response.json())
+                .then(data => {
+                    console.log('User info saved:', data);
+                    loadSavedMessages();
+                })
+                .catch(error => console.error('Error saving user info:', error));
+        }
+
+        function updatePreview() {
+            // ฟังก์ชัน updatePreview() ยังคงเหมือนเดิม
+        }
+
+        function renderFlexMessage(flexMessage) {
+            // ฟังก์ชัน renderFlexMessage() ยังคงเหมือนเดิม
+        }
+
+        function saveMessage() {
+            const jsonInput = document.getElementById('jsonInput').value;
+            if (!jsonInput.trim()) {
+                alert('Please enter JSON data before saving.');
+                return;
+            }
+
+            try {
+                JSON.parse(jsonInput);
+                fetch(`${scriptUrl}?action=saveMessage&userId=${userId}&displayName=${displayName}&jsonMessage=${encodeURIComponent(jsonInput)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        alert('Message saved successfully.');
+                        loadSavedMessages();
+                    })
+                    .catch(error => console.error('Error saving message:', error));
+            } catch (error) {
+                console.error('Invalid JSON:', error);
+                alert('Invalid JSON. Please check your input.');
+            }
+        }
+
+        function loadSavedMessages() {
+            fetch(`${scriptUrl}?action=getSavedMessages&userId=${userId}`)
+                .then(response => response.json())
+                .then(messages => displaySavedMessages(messages))
+                .catch(error => console.error('Error loading saved messages:', error));
+        }
+
+        function displaySavedMessages(messages) {
+          const savedMessagesDiv = document.getElementById('savedMessages');
+            savedMessagesDiv.innerHTML = '';
+
+            if (messages.length === 0) {
+                savedMessagesDiv.innerHTML = '<p>No saved messages found.</p>';
+                return;
+            }
+
+            const table = document.createElement('table');
+            table.className = 'table table-striped';
+
+            const thead = document.createElement('thead');
+            thead.innerHTML = `
+                <tr>
+                    <th>#</th>
+                    <th>Timestamp</th>
+                    <th>Actions</th>
+                </tr>
+            `;
+            table.appendChild(thead);
+
+            const tbody = document.createElement('tbody');
+
+            messages.forEach((message, index) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${new Date(message.timestamp).toLocaleString()}</td>
+                    <td>
+                        <button class="btn btn-sm btn-primary" onclick='loadMessage(${JSON.stringify(message.json)})'>Load</button>
+                        <button class="btn btn-sm btn-danger" onclick='deleteMessage("${message.timestamp}")'>Delete</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            table.appendChild(tbody);
+            savedMessagesDiv.appendChild(table);
+        }
+
+        function loadMessage(json) {
+          document.getElementById('jsonInput').value = json;
+            updatePreview();
+        }
+
+        function deleteMessage(timestamp) {
+            if (confirm('Are you sure you want to delete this message?')) {
+                fetch(`${scriptUrl}?action=deleteMessage&timestamp=${timestamp}&userId=${userId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        alert('Message deleted successfully.');
+                        loadSavedMessages();
+                    })
+                    .catch(error => console.error('Error deleting message:', error));
+            }
+        }
+
+        function shareMessage() {
+            const jsonInput = document.getElementById('jsonInput').value;
+            if (!jsonInput.trim()) {
+                alert('Please enter JSON data before sharing.');
+                return;
+            }
+
+            try {
+                const flexMessage = JSON.parse(jsonInput);
+                liff.shareTargetPicker([
+                    {
+                        type: 'flex',
+                        altText: 'Flex Message',
+                        contents: flexMessage
+                    }
+                ])
+                .then(() => {
+                    alert('Message shared successfully.');
+                })
+                .catch(err => {
+                    console.error('Error sharing message', err);
+                    alert('Failed to share message.');
+                });
+            } catch (error) {
+                console.error('Invalid JSON:', error);
+                alert('Invalid JSON. Please check your input.');
+            }
+        }
+
+        function showLoading(show) {
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            loadingOverlay.style.display = show ? 'flex' : 'none';
+        }
+
+        function clearEditor() {
+            document.getElementById('jsonInput').value = '';
+            const previewFrame = document.getElementById('previewFrame');
+            previewFrame.src = '';
+        }
+
+        // สร้าง JavaScript object
+const flexMessage = {
+  type: "bubble",
+  hero: {
+    type: "image",
+    url: "https://scdn.line-apps.com/n/channel_devcenter/img/fx/01_1_cafe.png",
+    size: "full",
+    aspectRatio: "20:13",
+    aspectMode: "cover",
+    action: {
+      type: "uri",
+      uri: "http://linecorp.com/"
+    }
+  },
+  body: {
+    type: "box",
+    layout: "vertical",
+    contents: [
+      {
+        type: "text",
+        text: "Brown Cafe",
+        weight: "bold",
+        size: "xl"
+      },
+      {
+        type: "box",
+        layout: "baseline",
+        margin: "md",
+        contents: [
+          {
+            type: "icon",
+            size: "sm",
+            url: "https://scdn.line-apps.com/n/channel_devcenter/img/fx/review_gold_star_28.png"
+          },
+          {
+            type: "icon",
+            size: "sm",
+            url: "https://scdn.line-apps.com/n/channel_devcenter/img/fx/review_gold_star_28.png"
+          },
+          {
+            type: "icon",
+            size: "sm",
+            url: "https://scdn.line-apps.com/n/channel_devcenter/img/fx/review_gold_star_28.png"
+          },
+          {
+            type: "icon",
+            size: "sm",
+            url: "https://scdn.line-apps.com/n/channel_devcenter/img/fx/review_gold_star_28.png"
+          },
+          {
+            type: "icon",
+            size: "sm",
+            url: "https://scdn.line-apps.com/n/channel_devcenter/img/fx/review_gray_star_28.png"
+          },
+          {
+            type: "text",
+            text: "4.0",
+            size: "sm",
+            color: "#999999",
+            margin: "md",
+            flex: 0
+          }
+        ]
+      },
+      {
+        type: "box",
+        layout: "vertical",
+        margin: "lg",
+        spacing: "sm",
+        contents: [
+          {
+            type: "box",
+            layout: "baseline",
+            spacing: "sm",
+            contents: [
+              {
+                type: "text",
+                text: "Place",
+                color: "#aaaaaa",
+                size: "sm",
+                flex: 1
+              },
+              {
+                type: "text",
+                text: "Miraina Tower, 4-1-6 Shinjuku, Tokyo",
+                wrap: true,
+                color: "#666666",
+                size: "sm",
+                flex: 5
+              }
+            ]
+          },
+          {
+            type: "box",
+            layout: "baseline",
+            spacing: "sm",
+            contents: [
+              {
+                type: "text",
+                text: "Time",
+                color: "#aaaaaa",
+                size: "sm",
+                flex: 1
+              },
+              {
+                type: "text",
+                text: "10:00 - 23:00",
+                wrap: true,
+                color: "#666666",
+                size: "sm",
+                flex: 5
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  footer: {
+    type: "box",
+    layout: "vertical",
+    spacing: "sm",
+    contents: [
+      {
+        type: "button",
+        style: "link",
+        height: "sm",
+        action: {
+          type: "uri",
+          label: "CALL",
+          uri: "https://linecorp.com"
+        }
+      },
+      {
+        type: "button",
+        style: "link",
+        height: "sm",
+        action: {
+          type: "uri",
+          label: "WEBSITE",
+          uri: "https://linecorp.com"
+        }
+      },
+      {
+        type: "spacer",
+        size: "sm"
+      }
+    ],
+    flex: 0
+  }
+};
+
+// แปลง object เป็น JSON string
+const validJsonString = JSON.stringify(flexMessage);
+
+console.log(validJsonString);
+    </script>
+
+</body>
 </html>
